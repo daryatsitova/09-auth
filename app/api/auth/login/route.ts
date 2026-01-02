@@ -1,50 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-
-const API_BASE_URL =
-  process.env.EXTERNAL_API_URL || 'https://notehub-api.goit.study';
+import api from '../../api';
+import setCookieParser from 'set-cookie-parser';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore.toString();
+
+    const response = await api.post('/auth/login', body, {
       headers: {
         'Content-Type': 'application/json',
+        ...(cookieHeader && { Cookie: cookieHeader }),
       },
-      body: JSON.stringify(body),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(error, { status: response.status });
-    }
-
-    const data = await response.json();
-
-    const setCookieHeaders = response.headers.getSetCookie();
-
+    const data = response.data;
     const nextResponse = NextResponse.json(data);
 
-    if (setCookieHeaders && setCookieHeaders.length > 0) {
-      const cookieStore = await cookies();
-
-      setCookieHeaders.forEach(cookieString => {
-        const [nameValue, ...attributes] = cookieString.split(';');
-        const [name, value] = nameValue.split('=');
-
-        cookieStore.set(name.trim(), value?.trim() || '', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
+    const setCookieHeaders = response.headers['set-cookie'];
+    
+    if (setCookieHeaders) {
+      const parsedCookies = setCookieParser(setCookieHeaders);
+      
+      for (const cookie of parsedCookies) {
+        if (cookie.name === 'accessToken' || cookie.name === 'refreshToken') {
+          console.log(`Setting ${cookie.name} cookie:`, cookie.value);
+        }
+        
+        nextResponse.cookies.set(cookie.name, cookie.value, {
+          httpOnly: cookie.httpOnly,
+          secure: cookie.secure,
+          sameSite: cookie.sameSite as any,
+          path: cookie.path,
+          maxAge: cookie.maxAge,
+          expires: cookie.expires,
         });
-      });
+      }
     }
 
     return nextResponse;
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Login error:', error);
+    
+    if (error.response) {
+      return NextResponse.json(
+        error.response.data || { message: 'Login failed' },
+        { status: error.response.status }
+      );
+    }
+
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

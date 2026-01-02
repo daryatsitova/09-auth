@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export interface ApiError {
   message: string;
   response?: {
@@ -22,3 +24,10 @@ export class ApiErrorClass extends Error implements ApiError {
     this.response = response;
   }
 }
+
+const api = axios.create({
+  baseURL: process.env.EXTERNAL_API_URL || 'https://notehub-api.goit.study',
+  withCredentials: true,
+});
+
+export default api;
