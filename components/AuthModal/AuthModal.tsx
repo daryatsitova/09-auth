@@ -19,7 +19,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
   const handleSuccess = () => {
     onClose();
-    // Используем window.location для принудительного редиректа
     window.location.href = '/profile';
   };
 

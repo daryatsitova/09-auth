@@ -23,7 +23,6 @@ export default function ProfilePage() {
       }
     };
 
-    // Если пользователя нет в store, загружаем его
     if (!user) {
       fetchUserData();
     } else {

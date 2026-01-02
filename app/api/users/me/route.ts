@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE_URL = 'https://notehub-api.goit.study';
+const API_BASE_URL = process.env.EXTERNAL_API_URL || 'https://notehub-api.goit.study';
 
 export async function GET(request: NextRequest) {
   try {

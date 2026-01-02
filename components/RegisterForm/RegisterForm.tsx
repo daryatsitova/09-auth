@@ -40,7 +40,7 @@ export default function RegisterForm({ onSwitchToLogin, onSuccess }: RegisterFor
           email: values.email,
           password: values.password,
         });
-        setUser(response); // Исправлено: response вместо response.user
+        setUser(response);
         toast.success('Account created successfully!');
         onSuccess?.();
       } catch (error: unknown) {

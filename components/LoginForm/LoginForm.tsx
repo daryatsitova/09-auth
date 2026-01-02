@@ -33,7 +33,7 @@ export default function LoginForm({ onSwitchToRegister, onSuccess }: LoginFormPr
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const response = await login(values);
-        setUser(response); // Исправлено: response вместо response.user
+        setUser(response);
         toast.success('Successfully logged in!');
         onSuccess?.();
       } catch (error: unknown) {
