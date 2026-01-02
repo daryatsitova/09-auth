@@ -70,10 +70,7 @@ export const getMe = async (): Promise<User> => {
 export const checkSession = async () => {
   try {
     const headers = await getHeadersWithCookies();
-    const response = await axios.get(
-      `${baseURL}/auth/session`,
-      { headers }
-    );
+    const response = await axios.get(`${baseURL}/auth/session`, { headers });
     return response;
   } catch (error) {
     throw error;

@@ -1,42 +1,16 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getMe } from '../../../lib/api/clientApi';
-import { useAuthStore } from '../../../lib/store/authStore';
+import type { Metadata } from 'next';
+import { getMe } from '../../../lib/api/serverApi';
 import css from './Profile.module.css';
 
-export default function ProfilePage() {
-  const { user, setUser } = useAuthStore();
-  const [loading, setLoading] = useState(true);
+export const metadata: Metadata = {
+  title: 'Profile',
+  description: 'User profile page',
+};
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await getMe();
-        setUser(userData);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!user) {
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, [user, setUser]);
-
-  if (loading) {
-    return (
-      <main className={css.mainContent}>
-        <div>Loading...</div>
-      </main>
-    );
-  }
+export default async function ProfilePage() {
+  const user = await getMe();
 
   return (
     <main className={css.mainContent}>

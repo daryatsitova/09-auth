@@ -1,10 +1,6 @@
 import axios from 'axios';
 import type { Note, NotePost } from '../types/note';
-import type {
-  User,
-  LoginData,
-  RegisterData,
-} from '../types/user';
+import type { User, LoginData, RegisterData } from '../types/user';
 import type { AuthResponse } from '../types/auth';
 
 export type NoteId = Note['id'];

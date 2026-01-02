@@ -34,7 +34,7 @@ export default async function middleware(request: NextRequest) {
     try {
       const { checkSession } = await import('./lib/api/serverApi');
       const sessionResponse = await checkSession();
-      
+
       if (!sessionResponse.data.user) {
         return NextResponse.redirect(new URL('/sign-in', request.url));
       }
