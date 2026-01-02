@@ -13,8 +13,3 @@ export interface RegisterData {
   email: string;
   password: string;
 }
-
-export interface AuthResponse {
-  user: User;
-  message?: string;
-}

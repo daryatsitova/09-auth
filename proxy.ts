@@ -33,9 +33,9 @@ export default async function middleware(request: NextRequest) {
   if (refreshToken && !accessToken && isPrivateRoute) {
     try {
       const { checkSession } = await import('./lib/api/serverApi');
-      const sessionData = await checkSession();
-
-      if (!sessionData.user) {
+      const sessionResponse = await checkSession();
+      
+      if (!sessionResponse.data.user) {
         return NextResponse.redirect(new URL('/sign-in', request.url));
       }
     } catch (error) {

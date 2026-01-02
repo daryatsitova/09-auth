@@ -1,22 +1,8 @@
 import { api } from './api';
-import type { Note, NotePost } from '../../types/note';
-import type { User } from '../../types/user';
+import type { Note } from '../../types/note';
+import type { User, LoginData, RegisterData } from '../../types/user';
 
 const ALL_TAGS = ['All', 'Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
-
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface RegisterData {
-  email: string;
-  password: string;
-}
-
-interface AuthResponse {
-  user: User;
-}
 
 interface NotesHttpResponse {
   notes: Note[];
@@ -27,6 +13,12 @@ interface FetchNotesParam {
   search: string;
   page: number;
   perPage: number;
+  tag?: string;
+}
+
+interface NotePost {
+  title: string;
+  content: string;
   tag?: string;
 }
 

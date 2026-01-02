@@ -67,16 +67,16 @@ export const getMe = async (): Promise<User> => {
   return response.data;
 };
 
-export const checkSession = async (): Promise<{ user: User | null }> => {
+export const checkSession = async () => {
   try {
     const headers = await getHeadersWithCookies();
-    const response = await axios.get<{ user: User | null }>(
+    const response = await axios.get(
       `${baseURL}/auth/session`,
       { headers }
     );
-    return response.data;
-  } catch {
-    return { user: null };
+    return response;
+  } catch (error) {
+    throw error;
   }
 };
 
