@@ -2,19 +2,15 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
 import { fetchNoteById } from '@/lib/api/clientApi';
 import { useRouter } from 'next/navigation';
 import css from './NotePreview.module.css';
 import Modal from '@/components/Modal/Modal';
 
-interface NotePreviewClientProps {
-  params: {
-    id: string;
-  };
-}
-
-const NotePreviewClient = ({ params }: NotePreviewClientProps) => {
-  const { id } = params;
+const NotePreviewClient = () => {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
 
   const close = () => router.back();
