@@ -13,11 +13,7 @@ import Modal from '@/components/Modal/Modal';
 const NotePreviewClient = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { isAuthenticated, checkSession } = useAuthStore();
-
-  useEffect(() => {
-    checkSession();
-  }, [checkSession]);
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     if (!isAuthenticated) {

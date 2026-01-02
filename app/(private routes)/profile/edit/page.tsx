@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { getMe, updateMe } from '../../../../lib/api/clientApi';
-import { useAuthStore } from '../../../../lib/store/authStore';
+import { useAuthStore } from '@/lib/store/authStore';
+import { getMe, updateMe } from '@/lib/api/clientApi';
 import css from './EditProfile.module.css';
 
 export default function EditProfilePage() {
