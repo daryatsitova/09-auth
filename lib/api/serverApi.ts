@@ -3,7 +3,10 @@ import { cookies } from 'next/headers';
 import type { Note } from '../../types/note';
 import type { User } from '../../types/user';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL + '/api';
+const baseURL = process.env.VERCEL_URL 
+  ? `https://${process.env.VERCEL_URL}/api`
+  : 'http://localhost:3000/api';
+
 const ALL_TAGS = ['All', 'Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
 
 async function getHeadersWithCookies() {

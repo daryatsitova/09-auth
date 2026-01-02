@@ -1,0 +1,11 @@
+{
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://notehub-api.goit.study",
+    "EXTERNAL_API_URL": "https://notehub-api.goit.study"
+  },
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
+}
