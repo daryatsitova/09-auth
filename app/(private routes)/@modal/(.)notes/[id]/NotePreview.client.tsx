@@ -3,27 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { useEffect } from 'react';
-import { fetchNoteById } from '@/lib/api/clientApi';
-import { useAuthStore } from '@/lib/store/authStore';
-import Loader from '@/components/Loader/Loader';
+import { fetchNoteById } from '../../../../../lib/api/clientApi';
 import css from './NotePreview.module.css';
 import Modal from '@/components/Modal/Modal';
 
 const NotePreviewClient = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { isAuthenticated, checkSession } = useAuthStore();
-
-  useEffect(() => {
-    checkSession();
-  }, [checkSession]);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/');
-    }
-  }, [isAuthenticated, router]);
 
   const close = () => router.back();
 
@@ -35,12 +21,7 @@ const NotePreviewClient = () => {
     queryKey: ['note', id],
     queryFn: () => fetchNoteById(id),
     refetchOnMount: false,
-    enabled: isAuthenticated,
   });
-
-  if (!isAuthenticated) {
-    return <Loader />;
-  }
 
   if (isLoading) return <p>Loading, please wait...</p>;
 

@@ -23,3 +23,58 @@
   line-height: 28px;
   margin-bottom: 16px;
 }
+
+/* Стили для аутентифицированных пользователей */
+.welcomeBack {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-width: 140px;
+  text-align: center;
+}
+
+.primaryButton:hover {
+  background-color: #2563eb;
+}
+
+.secondaryButton {
+  display: inline-block;
+  background-color: transparent;
+  color: #3b82f6;
+  padding: 14px 28px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  text-align: center;
+}
+
+.secondaryButton:hover {
+  background-color: #3b82f6;
+  color: white;
+}

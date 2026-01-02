@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query';
 import css from './NotesPage.module.css';
 import AppClient from './Notes.client';
-import { fetchNotes } from '@/lib/api';
+import { fetchNotes } from '@/lib/api/serverApi';
 import type { Metadata } from 'next';
 
 type AppProps = {

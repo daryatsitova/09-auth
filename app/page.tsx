@@ -1,3 +1,6 @@
+'use client';
+
+import Link from 'next/link';
 import css from './Home.module.css';
 
 const Home = () => {

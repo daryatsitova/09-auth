@@ -35,3 +35,65 @@
 .navigation li a:hover {
     color: #ddd;
 }
+
+/* Стили для аутентификации */
+.authSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.userEmail {
+    color: #ddd;
+    font-size: 0.9rem;
+}
+
+.authButtons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.loginButton,
+.registerButton,
+.logoutButton {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.loginButton {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+}
+
+.loginButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.registerButton {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.registerButton:hover {
+    background-color: #2563eb;
+}
+
+.logoutButton {
+    background-color: #ef4444;
+    color: white;
+}
+
+.logoutButton:hover {
+    background-color: #dc2626;
+}

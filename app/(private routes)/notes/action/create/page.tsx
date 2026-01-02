@@ -1,5 +1,5 @@
 import css from './CreateNote.module.css';
-import { getTags } from '@/lib/api';
+import { getTags } from '@/lib/api/serverApi';
 import {
   dehydrate,
   HydrationBoundary,
