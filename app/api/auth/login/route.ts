@@ -21,15 +21,15 @@ export async function POST(request: NextRequest) {
     const nextResponse = NextResponse.json(data);
 
     const setCookieHeaders = response.headers['set-cookie'];
-    
+
     if (setCookieHeaders) {
       const parsedCookies = setCookieParser(setCookieHeaders);
-      
+
       for (const cookie of parsedCookies) {
         if (cookie.name === 'accessToken' || cookie.name === 'refreshToken') {
           console.log(`Setting ${cookie.name} cookie:`, cookie.value);
         }
-        
+
         nextResponse.cookies.set(cookie.name, cookie.value, {
           httpOnly: cookie.httpOnly,
           secure: cookie.secure,
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     return nextResponse;
   } catch (error: any) {
     console.error('Login error:', error);
-    
+
     if (error.response) {
       return NextResponse.json(
         error.response.data || { message: 'Login failed' },

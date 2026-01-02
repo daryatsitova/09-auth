@@ -1,30 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import api from '../../api';
+import { isAxiosError } from 'axios';
 
-const API_BASE_URL =
-  process.env.EXTERNAL_API_URL || 'https://notehub-api.goit.study';
+export const dynamic = 'force-dynamic';
+
+function logErrorResponse(error: any, endpoint: string) {
+  console.error(`Error at ${endpoint}:`, error);
+  if (isAxiosError(error) && error.response) {
+    console.error('Response data:', error.response.data);
+    console.error('Response status:', error.response.status);
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    const response = await fetch(`${API_BASE_URL}/users/me`, {
-      method: 'GET',
+    const response = await api.get('/users/me', {
       headers: {
         'Content-Type': 'application/json',
-        Cookie: cookieHeader,
+        ...(cookieHeader && { Cookie: cookieHeader }),
       },
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(error, { status: response.status });
+    return NextResponse.json(response.data);
+  } catch (error: any) {
+    logErrorResponse(error, '/users/me GET');
+
+    if (isAxiosError(error)) {
+      return NextResponse.json(
+        error.response?.data || { message: 'Failed to fetch user data' },
+        { status: error.response?.status || 500 }
+      );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
@@ -38,23 +49,24 @@ export async function PATCH(request: NextRequest) {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
 
-    const response = await fetch(`${API_BASE_URL}/users/me`, {
-      method: 'PATCH',
+    const response = await api.patch('/users/me', body, {
       headers: {
         'Content-Type': 'application/json',
-        Cookie: cookieHeader,
+        ...(cookieHeader && { Cookie: cookieHeader }),
       },
-      body: JSON.stringify(body),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(error, { status: response.status });
+    return NextResponse.json(response.data);
+  } catch (error: any) {
+    logErrorResponse(error, '/users/me PATCH');
+
+    if (isAxiosError(error)) {
+      return NextResponse.json(
+        error.response?.data || { message: 'Failed to update user data' },
+        { status: error.response?.status || 500 }
+      );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

@@ -7,11 +7,11 @@ export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
-    
+
     // Проверяем наличие токенов в cookies
     const accessToken = cookieStore.get('accessToken')?.value;
     const refreshToken = cookieStore.get('refreshToken')?.value;
-    
+
     if (!accessToken && !refreshToken) {
       return NextResponse.json({ user: null }, { status: 401 });
     }
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const setCookieHeaders = response.headers['set-cookie'];
     if (setCookieHeaders) {
       const parsedCookies = setCookieParser(setCookieHeaders);
-      
+
       for (const cookie of parsedCookies) {
         if (cookie.name === 'accessToken' || cookie.name === 'refreshToken') {
           console.log(`Updating ${cookie.name} token`);
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     return nextResponse;
   } catch (error: any) {
     console.error('Session check error:', error);
-    
+
     if (error.response?.status === 401) {
       return NextResponse.json({ user: null }, { status: 401 });
     }

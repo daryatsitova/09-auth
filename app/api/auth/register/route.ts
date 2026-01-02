@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
     const nextResponse = NextResponse.json(data);
 
     const setCookieHeaders = response.headers['set-cookie'];
-    
+
     if (setCookieHeaders) {
       const parsedCookies = setCookieParser(setCookieHeaders);
-      
+
       for (const cookie of parsedCookies) {
         nextResponse.cookies.set(cookie.name, cookie.value, {
           httpOnly: cookie.httpOnly,
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     return nextResponse;
   } catch (error: any) {
     console.error('Registration error:', error);
-    
+
     if (error.response) {
       return NextResponse.json(
         error.response.data || { message: 'Registration failed' },
