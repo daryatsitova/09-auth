@@ -11,8 +11,6 @@ export default async function middleware(request: NextRequest) {
   let accessToken = cookieStore.get('accessToken')?.value;
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
-  let response = NextResponse.next();
-
   // Логика поновления сесії - выполняется ДО проверки аутентификации
   // Если есть refreshToken но нет accessToken, пытаемся обновить сесію
   if (refreshToken && !accessToken) {
@@ -28,11 +26,17 @@ export default async function middleware(request: NextRequest) {
 
       if (sessionResponse.ok) {
         const sessionData = await sessionResponse.json();
-
-        // Если сессия успешно обновлена, перенаправляем для получения новых куков
+        
+        // Если сессия успешно обновлена, получаем новые куки из заголовков
         if (sessionData.success) {
-          response = NextResponse.redirect(request.url);
-          return response;
+          const setCookieHeader = sessionResponse.headers.get('set-cookie');
+          if (setCookieHeader) {
+            // Извлекаем accessToken из set-cookie заголовков
+            const accessTokenMatch = setCookieHeader.match(/accessToken=([^;]+)/);
+            if (accessTokenMatch) {
+              accessToken = accessTokenMatch[1];
+            }
+          }
         }
       }
     } catch (error) {
@@ -60,7 +64,7 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/notes', request.url));
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
