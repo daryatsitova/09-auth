@@ -8,6 +8,8 @@ import {
 import type { Metadata } from 'next';
 import NoteForm from '@/components/NoteForm/NoteForm';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Create new note',
   description: 'Page for creating a new note',
