@@ -28,7 +28,7 @@ export default async function middleware(request: NextRequest) {
 
       if (sessionResponse.ok) {
         const sessionData = await sessionResponse.json();
-        
+
         // Если сессия успешно обновлена, перенаправляем для получения новых куков
         if (sessionData.success) {
           response = NextResponse.redirect(request.url);
