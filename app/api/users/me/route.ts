@@ -1,74 +1,59 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import api from '../../api';
-import { isAxiosError } from 'axios';
-
 export const dynamic = 'force-dynamic';
 
-function logErrorResponse(error: any, endpoint: string) {
-  console.error(`Error at ${endpoint}:`, error);
-  if (isAxiosError(error) && error.response) {
-    console.error('Response data:', error.response.data);
-    console.error('Response status:', error.response.status);
-  }
-}
+import { NextResponse } from 'next/server';
+import { api } from '../../api';
+import { cookies } from 'next/headers';
+import { logErrorResponse } from '../../_utils/utils';
+import { isAxiosError } from 'axios';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
 
-    const response = await api.get('/users/me', {
+    const res = await api.get('/users/me', {
       headers: {
-        'Content-Type': 'application/json',
-        ...(cookieHeader && { Cookie: cookieHeader }),
+        Cookie: cookieStore.toString(),
       },
     });
-
-    return NextResponse.json(response.data);
-  } catch (error: any) {
-    logErrorResponse(error, '/users/me GET');
-
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error) {
     if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
       return NextResponse.json(
-        error.response?.data || { message: 'Failed to fetch user data' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
       );
     }
-
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
   try {
-    const body = await request.json();
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    const body = await request.json();
 
-    const response = await api.patch('/users/me', body, {
+    const res = await api.patch('/users/me', body, {
       headers: {
-        'Content-Type': 'application/json',
-        ...(cookieHeader && { Cookie: cookieHeader }),
+        Cookie: cookieStore.toString(),
       },
     });
-
-    return NextResponse.json(response.data);
-  } catch (error: any) {
-    logErrorResponse(error, '/users/me PATCH');
-
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error) {
     if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
       return NextResponse.json(
-        error.response?.data || { message: 'Failed to update user data' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
       );
     }
-
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }

@@ -1,63 +1,55 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import api from '../../api';
-import setCookieParser from 'set-cookie-parser';
+import { api } from '../../api';
+import { parse } from 'cookie';
+import { isAxiosError } from 'axios';
+import { logErrorResponse } from '../../_utils/utils';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
-
-    // Проверяем наличие токенов в cookies
     const accessToken = cookieStore.get('accessToken')?.value;
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    if (!accessToken && !refreshToken) {
-      return NextResponse.json({ user: null }, { status: 401 });
+    if (accessToken) {
+      return NextResponse.json({ success: true });
     }
 
-    const response = await api.get('/auth/session', {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(cookieHeader && { Cookie: cookieHeader }),
-      },
-    });
+    if (refreshToken) {
+      const apiRes = await api.get('auth/session', {
+        headers: {
+          Cookie: cookieStore.toString(),
+        },
+      });
 
-    const data = response.data;
-    const nextResponse = NextResponse.json(data);
+      const setCookie = apiRes.headers['set-cookie'];
 
-    // Если в ответе есть новые токены, устанавливаем их
-    const setCookieHeaders = response.headers['set-cookie'];
-    if (setCookieHeaders) {
-      const parsedCookies = setCookieParser(setCookieHeaders);
+      if (setCookie) {
+        const cookieArray = Array.isArray(setCookie) ? setCookie : [setCookie];
+        for (const cookieStr of cookieArray) {
+          const parsed = parse(cookieStr);
 
-      for (const cookie of parsedCookies) {
-        if (cookie.name === 'accessToken' || cookie.name === 'refreshToken') {
-          console.log(`Updating ${cookie.name} token`);
-          nextResponse.cookies.set(cookie.name, cookie.value, {
-            httpOnly: cookie.httpOnly,
-            secure: cookie.secure,
-            sameSite: cookie.sameSite as any,
-            path: cookie.path,
-            maxAge: cookie.maxAge,
-            expires: cookie.expires,
-          });
+          const options = {
+            expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
+            path: parsed.Path,
+            maxAge: Number(parsed['Max-Age']),
+          };
+
+          if (parsed.accessToken)
+            cookieStore.set('accessToken', parsed.accessToken, options);
+          if (parsed.refreshToken)
+            cookieStore.set('refreshToken', parsed.refreshToken, options);
         }
+        return NextResponse.json({ success: true }, { status: 200 });
       }
     }
-
-    return nextResponse;
-  } catch (error: any) {
-    console.error('Session check error:', error);
-
-    if (error.response?.status === 401) {
-      return NextResponse.json({ user: null }, { status: 401 });
+    return NextResponse.json({ success: false }, { status: 200 });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
+      return NextResponse.json({ success: false }, { status: 200 });
     }
-
-    return NextResponse.json({ user: null }, { status: 200 });
+    logErrorResponse({ message: (error as Error).message });
+    return NextResponse.json({ success: false }, { status: 200 });
   }
-}
-
-export async function POST() {
-  return NextResponse.json({ message: 'Session endpoint' });
 }

@@ -1,59 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { api } from '../../api';
 import { cookies } from 'next/headers';
-import api from '../../api';
-import setCookieParser from 'set-cookie-parser';
+import { parse } from 'cookie';
+import { isAxiosError } from 'axios';
+import { logErrorResponse } from '../../_utils/utils';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await req.json();
+    const apiRes = await api.post('auth/login', body);
 
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    const setCookie = apiRes.headers['set-cookie'];
 
-    const response = await api.post('/auth/login', body, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(cookieHeader && { Cookie: cookieHeader }),
-      },
-    });
-
-    const data = response.data;
-    const nextResponse = NextResponse.json(data);
-
-    const setCookieHeaders = response.headers['set-cookie'];
-
-    if (setCookieHeaders) {
-      const parsedCookies = setCookieParser(setCookieHeaders);
-
-      for (const cookie of parsedCookies) {
-        if (cookie.name === 'accessToken' || cookie.name === 'refreshToken') {
-          console.log(`Setting ${cookie.name} cookie:`, cookie.value);
-        }
-
-        nextResponse.cookies.set(cookie.name, cookie.value, {
-          httpOnly: cookie.httpOnly,
-          secure: cookie.secure,
-          sameSite: cookie.sameSite as any,
-          path: cookie.path,
-          maxAge: cookie.maxAge,
-          expires: cookie.expires,
-        });
+    if (setCookie) {
+      const cookieArray = Array.isArray(setCookie) ? setCookie : [setCookie];
+      for (const cookieStr of cookieArray) {
+        const parsed = parse(cookieStr);
+        const options = {
+          expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
+          path: parsed.Path,
+          maxAge: Number(parsed['Max-Age']),
+        };
+        if (parsed.accessToken)
+          cookieStore.set('accessToken', parsed.accessToken, options);
+        if (parsed.refreshToken)
+          cookieStore.set('refreshToken', parsed.refreshToken, options);
       }
+
+      return NextResponse.json(apiRes.data, { status: apiRes.status });
     }
 
-    return nextResponse;
-  } catch (error: any) {
-    console.error('Login error:', error);
-
-    if (error.response) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
       return NextResponse.json(
-        error.response.data || { message: 'Login failed' },
-        { status: error.response.status }
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
       );
     }
-
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }

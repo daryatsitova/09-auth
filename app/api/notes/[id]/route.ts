@@ -1,116 +1,89 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { api } from '../../api';
 import { cookies } from 'next/headers';
-import api from '../../api';
+import { logErrorResponse } from '../../_utils/utils';
 import { isAxiosError } from 'axios';
 
-function logErrorResponse(error: any, endpoint: string) {
-  console.error(`Error at ${endpoint}:`, error);
-  if (isAxiosError(error) && error.response) {
-    console.error('Response data:', error.response.data);
-    console.error('Response status:', error.response.status);
-  }
-}
+type Props = {
+  params: Promise<{ id: string }>;
+};
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: Props) {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
     const { id } = await params;
-
-    const response = await api.get(`/notes/${id}`, {
+    const res = await api(`/notes/${id}`, {
       headers: {
-        'Content-Type': 'application/json',
-        ...(cookieHeader && { Cookie: cookieHeader }),
+        Cookie: cookieStore.toString(),
       },
     });
-
-    return NextResponse.json(response.data);
-  } catch (error: any) {
-    logErrorResponse(error, `/notes/${(await params).id} GET`);
-
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error) {
     if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
       return NextResponse.json(
-        error.response?.data || { message: 'Failed to fetch note' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
       );
     }
-
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: Request, { params }: Props) {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
     const { id } = await params;
 
-    const response = await api.delete(`/notes/${id}`, {
+    const res = await api.delete(`/notes/${id}`, {
       headers: {
-        'Content-Type': 'application/json',
-        ...(cookieHeader && { Cookie: cookieHeader }),
+        Cookie: cookieStore.toString(),
       },
     });
-
-    return NextResponse.json(response.data);
-  } catch (error: any) {
-    const { id } = await params;
-    logErrorResponse(error, `/notes/${id} DELETE`);
-
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error) {
     if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
       return NextResponse.json(
-        error.response?.data || { message: 'Failed to delete note' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
       );
     }
-
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, { params }: Props) {
   try {
+    const cookieStore = await cookies();
+    const { id } = await params;
     const body = await request.json();
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
-    const { id } = await params;
 
-    const response = await api.patch(`/notes/${id}`, body, {
+    const res = await api.patch(`/notes/${id}`, body, {
       headers: {
-        'Content-Type': 'application/json',
-        ...(cookieHeader && { Cookie: cookieHeader }),
+        Cookie: cookieStore.toString(),
       },
     });
-
-    return NextResponse.json(response.data);
-  } catch (error: any) {
-    const { id } = await params;
-    logErrorResponse(error, `/notes/${id} PATCH`);
-
+    return NextResponse.json(res.data, { status: res.status });
+  } catch (error) {
     if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
       return NextResponse.json(
-        error.response?.data || { message: 'Failed to update note' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status }
       );
     }
-
+    logErrorResponse({ message: (error as Error).message });
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
