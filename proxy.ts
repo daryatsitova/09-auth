@@ -21,28 +21,18 @@ export default async function middleware(request: NextRequest) {
         new URL('/api/auth/session', request.url),
         {
           headers: {
-            Cookie: `refreshToken=${refreshToken}`,
+            Cookie: request.headers.get('Cookie') || '',
           },
         }
       );
 
       if (sessionResponse.ok) {
         const sessionData = await sessionResponse.json();
-        // Если получили новые токены, обновляем их в response
-        if (sessionData.accessToken) {
-          accessToken = sessionData.accessToken;
-          response.cookies.set('accessToken', sessionData.accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-          });
-        }
-        if (sessionData.refreshToken) {
-          response.cookies.set('refreshToken', sessionData.refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-          });
+        
+        // Если сессия успешно обновлена, перенаправляем для получения новых куков
+        if (sessionData.success) {
+          response = NextResponse.redirect(request.url);
+          return response;
         }
       }
     } catch (error) {
