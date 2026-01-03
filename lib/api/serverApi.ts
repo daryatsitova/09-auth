@@ -3,8 +3,8 @@ import { cookies } from 'next/headers';
 import type { Note } from '../../types/note';
 import type { User } from '../../types/user';
 
-const baseURL = process.env.NEXT_PUBLIC_VERCEL_URL
-  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api`
+const baseURL = process.env.NEXT_PUBLIC_API_URL 
+  ? `${process.env.NEXT_PUBLIC_API_URL}/api` 
   : process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}/api`
   : 'http://localhost:3000/api';
