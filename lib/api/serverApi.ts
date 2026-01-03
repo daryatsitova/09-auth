@@ -3,7 +3,9 @@ import { cookies } from 'next/headers';
 import type { Note } from '../../types/note';
 import type { User } from '../../types/user';
 
-const baseURL = process.env.VERCEL_URL
+const baseURL = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api`
+  : process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}/api`
   : 'http://localhost:3000/api';
 
@@ -44,30 +46,45 @@ export const fetchNotes = async (
     params.tag = tag;
   }
 
-  const headers = await getHeadersWithCookies();
-  const queryString = new URLSearchParams(
-    Object.entries(params)
-      .filter(([, value]) => value !== undefined)
-      .map(([key, value]) => [key, String(value)])
-  ).toString();
+  try {
+    const headers = await getHeadersWithCookies();
+    const queryString = new URLSearchParams(
+      Object.entries(params)
+        .filter(([, value]) => value !== undefined)
+        .map(([key, value]) => [key, String(value)])
+    ).toString();
 
-  const response = await axios.get<NotesHttpResponse>(
-    `${baseURL}/notes?${queryString}`,
-    { headers }
-  );
-  return response.data;
+    const response = await axios.get<NotesHttpResponse>(
+      `${baseURL}/notes?${queryString}`,
+      { headers }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    throw new Error('Failed to fetch notes');
+  }
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const headers = await getHeadersWithCookies();
-  const response = await axios.get<Note>(`${baseURL}/notes/${id}`, { headers });
-  return response.data;
+  try {
+    const headers = await getHeadersWithCookies();
+    const response = await axios.get<Note>(`${baseURL}/notes/${id}`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching note by id:', error);
+    throw new Error('Failed to fetch note details');
+  }
 };
 
 export const getMe = async (): Promise<User> => {
-  const headers = await getHeadersWithCookies();
-  const response = await axios.get<User>(`${baseURL}/users/me`, { headers });
-  return response.data;
+  try {
+    const headers = await getHeadersWithCookies();
+    const response = await axios.get<User>(`${baseURL}/users/me`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw new Error('Failed to fetch user data');
+  }
 };
 
 export const checkSession = async () => {
@@ -76,6 +93,7 @@ export const checkSession = async () => {
     const response = await axios.get(`${baseURL}/auth/session`, { headers });
     return response;
   } catch (error) {
+    console.error('Session check failed:', error);
     throw error;
   }
 };
