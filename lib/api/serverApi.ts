@@ -68,7 +68,9 @@ export const fetchNotes = async (
 export const fetchNoteById = async (id: string): Promise<Note> => {
   try {
     const headers = await getHeadersWithCookies();
-    const response = await axios.get<Note>(`${baseURL}/notes/${id}`, { headers });
+    const response = await axios.get<Note>(`${baseURL}/notes/${id}`, {
+      headers,
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching note by id:', error);
