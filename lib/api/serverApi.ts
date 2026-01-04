@@ -1,13 +1,7 @@
-import axios from 'axios';
+import { api } from './api';
 import { cookies } from 'next/headers';
 import type { Note } from '../../types/note';
 import type { User } from '../../types/user';
-
-const baseURL = process.env.NEXT_PUBLIC_API_URL 
-  ? `${process.env.NEXT_PUBLIC_API_URL}/api` 
-  : process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}/api`
-  : 'http://localhost:3000/api';
 
 const ALL_TAGS = ['All', 'Todo', 'Work', 'Personal', 'Meeting', 'Shopping'];
 
@@ -54,8 +48,8 @@ export const fetchNotes = async (
         .map(([key, value]) => [key, String(value)])
     ).toString();
 
-    const response = await axios.get<NotesHttpResponse>(
-      `${baseURL}/notes?${queryString}`,
+    const response = await api.get<NotesHttpResponse>(
+      `/notes?${queryString}`,
       { headers }
     );
     return response.data;
@@ -68,7 +62,7 @@ export const fetchNotes = async (
 export const fetchNoteById = async (id: string): Promise<Note> => {
   try {
     const headers = await getHeadersWithCookies();
-    const response = await axios.get<Note>(`${baseURL}/notes/${id}`, {
+    const response = await api.get<Note>(`/notes/${id}`, {
       headers,
     });
     return response.data;
@@ -81,7 +75,7 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
 export const getMe = async (): Promise<User> => {
   try {
     const headers = await getHeadersWithCookies();
-    const response = await axios.get<User>(`${baseURL}/users/me`, { headers });
+    const response = await api.get<User>(`/users/me`, { headers });
     return response.data;
   } catch (error) {
     console.error('Error fetching user:', error);
@@ -92,7 +86,7 @@ export const getMe = async (): Promise<User> => {
 export const checkSession = async () => {
   try {
     const headers = await getHeadersWithCookies();
-    const response = await axios.get(`${baseURL}/auth/session`, { headers });
+    const response = await api.get(`/auth/session`, { headers });
     return response;
   } catch (error) {
     console.error('Session check failed:', error);

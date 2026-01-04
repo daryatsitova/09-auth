@@ -11,6 +11,8 @@ export default async function middleware(request: NextRequest) {
   let accessToken = cookieStore.get('accessToken')?.value;
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
+  let response = NextResponse.next();
+
   // Логика поновления сесії - выполняется ДО проверки аутентификации
   // Если есть refreshToken но нет accessToken, пытаемся обновить сесію
   if (refreshToken && !accessToken) {
@@ -27,15 +29,30 @@ export default async function middleware(request: NextRequest) {
       if (sessionResponse.ok) {
         const sessionData = await sessionResponse.json();
         
-        // Если сессия успешно обновлена, получаем новые куки из заголовков
+        // Если сессия успешно обновлена, устанавливаем новые куки в response
         if (sessionData.success) {
           const setCookieHeader = sessionResponse.headers.get('set-cookie');
           if (setCookieHeader) {
-            // Извлекаем accessToken из set-cookie заголовков
-            const accessTokenMatch = setCookieHeader.match(/accessToken=([^;]+)/);
-            if (accessTokenMatch) {
-              accessToken = accessTokenMatch[1];
-            }
+            // Парсим и устанавливаем новые куки в response
+            const cookies = setCookieHeader.split(', ');
+            cookies.forEach(cookie => {
+              const [nameValue] = cookie.split(';');
+              const [name, value] = nameValue.split('=');
+              if (name === 'accessToken') {
+                accessToken = value;
+                response.cookies.set('accessToken', value, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production',
+                  sameSite: 'lax',
+                });
+              } else if (name === 'refreshToken') {
+                response.cookies.set('refreshToken', value, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production',
+                  sameSite: 'lax',
+                });
+              }
+            });
           }
         }
       }
@@ -45,8 +62,8 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  // Проверяем аутентификацию только по accessToken и refreshToken
-  const isAuthenticated = !!(accessToken || refreshToken);
+  // Проверяем аутентификацию только по действительному accessToken после попытки обновления
+  const isAuthenticated = !!accessToken;
 
   const isPrivateRoute = privateRoutes.some(route =>
     pathname.startsWith(route)
@@ -61,10 +78,10 @@ export default async function middleware(request: NextRequest) {
 
   // Если пользователь аутентифицирован и пытается попасть на маршрут аутентификации
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/notes', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
