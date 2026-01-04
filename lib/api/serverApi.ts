@@ -48,10 +48,9 @@ export const fetchNotes = async (
         .map(([key, value]) => [key, String(value)])
     ).toString();
 
-    const response = await api.get<NotesHttpResponse>(
-      `/notes?${queryString}`,
-      { headers }
-    );
+    const response = await api.get<NotesHttpResponse>(`/notes?${queryString}`, {
+      headers,
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching notes:', error);

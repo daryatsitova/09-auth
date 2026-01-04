@@ -28,7 +28,7 @@ export default async function middleware(request: NextRequest) {
 
       if (sessionResponse.ok) {
         const sessionData = await sessionResponse.json();
-        
+
         // Если сессия успешно обновлена, устанавливаем новые куки в response
         if (sessionData.success) {
           const setCookieHeader = sessionResponse.headers.get('set-cookie');
